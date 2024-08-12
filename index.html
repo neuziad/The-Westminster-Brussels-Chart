@@ -14,7 +14,7 @@
 			#text-overlay {
 				position: absolute;
 				mix-blend-mode: difference;
-				color: rgb(56, 56, 56);
+				color: rgb(85, 85, 85);
 				border-radius: 0.5rem;
 				pointer-events: none;
 				user-select: none;
@@ -34,7 +34,7 @@
 				pointer-events: none;
 				user-select: none;
 				z-index: 2;
-				top: 7.5%;
+				padding-top: 3%; /* This needs to be more "responsive" */
 				left: 1%;
 				font-family: "Roboto";
 				font-weight: 400;
@@ -45,6 +45,7 @@
 	<body>
 		<div id="text-overlay">The Westminster-Brussels Chart</div>
 		<div id="subtitle">An interactive chart by github.com/neuziad</div>
+		<div id="portrait"></div>
 		<script type="module" src="/main.js"></script>
 	</body>
 </html>

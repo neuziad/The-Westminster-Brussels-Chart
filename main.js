@@ -38,14 +38,58 @@ renderer.setClearColor(0xefefef, 1);
 const textOverlay = document.getElementById("text-overlay");
 const subtitle = document.getElementById("subtitle");
 
-// Load graphics explaining controls
-const loader = new SVGLoader();
-loader.load(
+// Create EU parliament groups array, listing their colors, cubes that will be crated, and their party's leaders' portrait
+const groups = [
+    { name: "PPE", color: 0x4db4ff, cubes: [], picture: "/portraits/PPE.jpg", personInPortrait: "Manfred Weber" },
+    { name: "S&D", color: 0xfd1c36, cubes: [], picture: "/portraits/S&D.jpg", personInPortrait: "Iratxe García Pérez" },
+    { name: "PfE", color: 0x422b76, cubes: [], picture: "/portraits/PFE.jpg", personInPortrait: "Jordan Bardella" },
+    { name: "ECR", color: 0x4086b9, cubes: [], picture: "/portraits/ECR.jpg", personInPortrait: "Nicola Procaccini" },
+    { name: "Renew", color: 0xffe13d, cubes: [], picture: "/portraits/RENEW.jpg", personInPortrait: "Valérie Hayer" },
+    { name: "Verts/EFA", color: 0x3ff34e, cubes: [], picture: "/portraits/VERTS_EFA.jpg", personInPortrait: "Bas Eickhout" },
+    { name: "The Left", color: 0xa03232, cubes: [], picture: "/portraits/THE_LEFT.jpg", personInPortrait: "Manon Aubry" },
+    { name: "ESN", color: 0x13277e, cubes: [], picture: "/portraits/ESN.jpg", personInPortrait: "René Aust" },
+    { name: "NI", color: 0x777777, cubes: [], picture: "/portraits/NI.jpg", personInPortrait: "Fidias Panayiotou" },
+    { name: "Vacant", color: 0xFFFFFF, cubes: [], picture: "/portraits/VACANT.jpg", personInPortrait: "Antoni Comín" },
+];
+
+// Create a loading manager
+const loadingManager = new THREE.LoadingManager();
+
+// Log progress during loading
+loadingManager.onProgress = (url, itemsLoaded, itemsTotal) => {
+    console.log(`Loading file: ${url}. Progress: ${itemsLoaded} of ${itemsTotal} files.`);
+};
+
+// Log when all loading is complete
+loadingManager.onLoad = () => {
+    console.log('All resources have been successfully loaded.');
+};
+
+// Log if there's an error during loading
+loadingManager.onError = (url) => {
+    console.error(`There was an error loading ${url}`);
+};
+
+// Use the loading manager with TextureLoader
+const textureLoader = new THREE.TextureLoader(loadingManager);
+
+// Load portrait images
+const portraits = groups.reduce((acc, group) => {
+    if (group.picture) {
+        const portrait = textureLoader.load(group.picture);
+        acc[group.name] = portrait;
+    }
+    return acc;
+}, {});
+
+// Use the loading manager with SVGLoader
+const svgLoader = new SVGLoader(loadingManager);
+svgLoader.load(
     "/controls.svg",
     (data) => {
         const paths = data.paths;
         const group = new THREE.Group();
-        
+
         paths.forEach((path) => {
             // Convert SVG path to shapes
             const shapes = path.toShapes(true);
@@ -58,43 +102,39 @@ loader.load(
             });
         });
 
-        // Position the graphic within scene
-        group.position.z = -18;
-        group.position.y = 9;
-        group.position.x = -77;
+        // Position the graphic within the scene
+        group.position.z = -17;
+        group.position.y = 18;
+        group.position.x = -52;
         group.scale.set(0.025, 0.025, 0.025);
-        group.rotation.set(1.5, 0, 0);
+        group.rotation.set(1.75, 0, 0);
         scene.add(group);
     },
     (xhr) => {
-        console.log((xhr.loaded / xhr.total) * 100 + "% loaded");
+        console.log("SVG graphics: " + (xhr.loaded / xhr.total) * 100 + "% loaded");
     },
     (error) => {
-        console.log(error);
+        console.log("Error loading SVG: ", error);
     }
 );
 
+// Create a plane geometry for the portrait image
+const planeGeometry = new THREE.PlaneGeometry(1.6, 2);
+const planeMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff, side: THREE.DoubleSide, transparent: true });
+const plane = new THREE.Mesh(planeGeometry, planeMaterial);
 
-// Add orbit controls
+// Set scale, rotation and position of portrait plane
+plane.position.set(42, 16, -5);
+plane.rotation.set(-1.4, 0, 0);
+plane.scale.set(6, 6, 6);
+scene.add(plane);
+
+// Add and set limits for orbit controls
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
 controls.dampingFactor = 0.05;
 controls.minDistance = 10;
 controls.maxDistance = 120;
-
-// EU parliament groups and their colors
-const groups = [
-    { name: "PPE", color: 0x4db4ff, cubes: [] },
-    { name: "S&D", color: 0xfd1c36, cubes: [] },
-    { name: "PfE", color: 0x422b76, cubes: [] },
-    { name: "ECR", color: 0x4086b9, cubes: [] },
-    { name: "Renew", color: 0xffe13d, cubes: [] },
-    { name: "Verts/EFA", color: 0x3ff34e, cubes: [] },
-    { name: "The Left", color: 0xa03232, cubes: [] },
-    { name: "ESN", color: 0x13277e, cubes: [] },
-    { name: "NI", color: 0x777777, cubes: [] },
-    { name: "Vacant", color: 0xFFFFFF, cubes: [] }
-];
 
 // Pointer move function, allows tracking of cursor for object interaction
 function onPointerMove(event) {
@@ -178,11 +218,23 @@ function intersection(event) {
 
                 // Set background colour to group colour overlay
                 renderer.setClearColor(group.color, 0.4);
+
+                // Set the background portraits
+                if (portraits[group.name]) {
+                    planeMaterial.map = portraits[group.name];
+                    planeMaterial.needsUpdate = true;
+                    planeMaterial.opacity = 1; // Ensure it's visible
+                } else {
+                    planeMaterial.map = null;
+                    planeMaterial.opacity = 0; // Hide if no texture
+                }
+
                 INTERSECTED = intersectedObject;
             }
         }
     } else {
         if (INTERSECTED) {
+
             // Safeguard to check if INTERSECTED has userData.group and cubes
             if (INTERSECTED.userData.group && INTERSECTED.userData.group.cubes) {
                 INTERSECTED.userData.group.cubes.forEach(cube => {
@@ -196,6 +248,10 @@ function intersection(event) {
             textOverlay.textContent = "The Westminster-Brussels Chart";
             subtitle.textContent = "An interactive chart by github.com/neuziad";
             renderer.setClearColor(0xefefef, 1);
+
+            // Hide the background image when not hovering
+            // planeMaterial.map = null;
+            // planeMaterial.opacity = 0;
         }
     }
 }
@@ -208,8 +264,8 @@ Papa.parse("/raw.csv", {
         const dataForm = results.data;
 
         let index = 0;
-        let gridHeight = 6;
-        let spacing = 1.3;
+        let gridHeight = 10;
+        let spacing = 1.2;
 
         groups.forEach((group) => {
 
@@ -257,8 +313,8 @@ Papa.parse("/raw.csv", {
                 const x = Math.floor(index / gridHeight) * spacing;
                 const z = (index % gridHeight) * spacing;
 
-                cube.position.set(x - 75, 10, z + 2);
-                hitbox.position.set(x - 75, 10, z + 2);
+                cube.position.set(x - 39, 15, z + 2);
+                hitbox.position.set(x - 39, 15, z + 2);
 
                 cube.castShadow = true;
                 cube.receiveShadow = true;

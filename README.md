@@ -17,3 +17,7 @@ npx vite
 ## Building
 
 WIP
+
+## Sources
+
+All data has been gathered from the [European Parliament's Open Data Portal](https://data.europarl.europa.eu/en/home)
