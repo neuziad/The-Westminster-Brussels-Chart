@@ -3,6 +3,7 @@ import Papa from "papaparse";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { RoundedBoxGeometry } from "three/examples/jsm/geometries/RoundedBoxGeometry.js";
 import { SVGLoader } from "three/examples/jsm/Addons.js";
+import { TextGeometry } from "three/examples/jsm/Addons.js";
 
 // Credit console log
 console.log("Project by neuziad");
@@ -40,16 +41,16 @@ const subtitle = document.getElementById("subtitle");
 
 // Create EU parliament groups array, listing their colors, cubes that will be crated, and their party's leaders' portrait
 const groups = [
-    { name: "PPE", color: 0x4db4ff, cubes: [], picture: "/portraits/PPE.jpg", personInPortrait: "Manfred Weber" },
-    { name: "S&D", color: 0xfd1c36, cubes: [], picture: "/portraits/S&D.jpg", personInPortrait: "Iratxe García Pérez" },
-    { name: "PfE", color: 0x422b76, cubes: [], picture: "/portraits/PFE.jpg", personInPortrait: "Jordan Bardella" },
-    { name: "ECR", color: 0x4086b9, cubes: [], picture: "/portraits/ECR.jpg", personInPortrait: "Nicola Procaccini" },
-    { name: "Renew", color: 0xffe13d, cubes: [], picture: "/portraits/RENEW.jpg", personInPortrait: "Valérie Hayer" },
-    { name: "Verts/EFA", color: 0x3ff34e, cubes: [], picture: "/portraits/VERTS_EFA.jpg", personInPortrait: "Bas Eickhout" },
-    { name: "The Left", color: 0xa03232, cubes: [], picture: "/portraits/THE_LEFT.jpg", personInPortrait: "Manon Aubry" },
-    { name: "ESN", color: 0x13277e, cubes: [], picture: "/portraits/ESN.jpg", personInPortrait: "René Aust" },
-    { name: "NI", color: 0x777777, cubes: [], picture: "/portraits/NI.jpg", personInPortrait: "Fidias Panayiotou" },
-    { name: "Vacant", color: 0xFFFFFF, cubes: [], picture: "/portraits/VACANT.jpg", personInPortrait: "Antoni Comín" },
+    { name: "PPE", color: 0x4db4ff, cubes: [], picture: "/portraits/PPE.jpg", notablePerson: "Roberta Metsola, 🇲🇹" },
+    { name: "S&D", color: 0xfd1c36, cubes: [], picture: "/portraits/S&D.jpg", notablePerson: "Iratxe García Pérez, 🇪🇸" },
+    { name: "PfE", color: 0x422b76, cubes: [], picture: "/portraits/PFE.jpg", notablePerson: "Jordan Bardella, 🇫🇷" },
+    { name: "ECR", color: 0x4086b9, cubes: [], picture: "/portraits/ECR.jpg", notablePerson: "Elena Donazzan, 🇮🇹" },
+    { name: "Renew", color: 0xffe13d, cubes: [], picture: "/portraits/RENEW.jpg", notablePerson: "Nikola Minchev, 🇧🇬" },
+    { name: "Verts/EFA", color: 0x3ff34e, cubes: [], picture: "/portraits/VERTS_EFA.jpg", notablePerson: "Bas Eickhout, 🇳🇱" },
+    { name: "The Left", color: 0xa03232, cubes: [], picture: "/portraits/THE_LEFT.jpg", notablePerson: "Kathleen Funchion, 🇮🇪" },
+    { name: "ESN", color: 0x13277e, cubes: [], picture: "/portraits/ESN.jpg", notablePerson: "René Aust, 🇩🇪" },
+    { name: "NI", color: 0x777777, cubes: [], picture: "/portraits/NI.jpg", notablePerson: "Fidias Panayiotou, 🇨🇾" },
+    { name: "Vacant", color: 0xFFFFFF, cubes: [], picture: "/portraits/VACANT.jpg", notablePerson: "Antoni Comín, 🏴󠁥󠁳󠁣󠁴󠁿󠁥 (ES-CT)" },
 ];
 
 // Create a loading manager
@@ -93,9 +94,9 @@ svgLoader.load(
     (data) => {
         const paths = data.paths;
         const group = new THREE.Group();
-
+        
+        // Convert SVG path to shapes
         paths.forEach((path) => {
-            // Convert SVG path to shapes
             const shapes = path.toShapes(true);
 
             shapes.forEach((shape) => {
@@ -126,6 +127,8 @@ svgLoader.load(
 const planeGeometry = new THREE.PlaneGeometry(1.6, 2);
 const planeMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff, side: THREE.DoubleSide, transparent: true });
 const plane = new THREE.Mesh(planeGeometry, planeMaterial);
+planeMaterial.map = null;
+planeMaterial.opacity = 0;
 
 // Set scale, rotation and position of portrait plane
 plane.position.set(42, 16, -5);
@@ -223,19 +226,19 @@ function intersection(event) {
                 // Set background colour to group colour overlay
                 renderer.setClearColor(group.color, 0.4);
 
-                // Set the background portraits
+                // Set the portrait
                 if (portraits[group.name]) {
                     planeMaterial.map = portraits[group.name];
+                    planeMaterial.opacity = 1;
                     planeMaterial.needsUpdate = true;
-                    planeMaterial.opacity = 1; // Ensure it's visible
                 } else {
                     planeMaterial.map = null;
-                    planeMaterial.opacity = 0; // Hide if no texture
-                }
+                    planeMaterial.opacity = 0;
+                };
 
                 INTERSECTED = intersectedObject;
-            }
         }
+    }
     } else {
         if (INTERSECTED) {
 
@@ -253,9 +256,9 @@ function intersection(event) {
             subtitle.textContent = "An interactive chart by github.com/neuziad";
             renderer.setClearColor(0xefefef, 1);
 
-            // Hide the background image when not hovering
-            // planeMaterial.map = null;
-            // planeMaterial.opacity = 0;
+            // Make the plane invisible when no group is hovered
+            planeMaterial.map = null;
+            planeMaterial.opacity = 0;
         }
     }
 }
