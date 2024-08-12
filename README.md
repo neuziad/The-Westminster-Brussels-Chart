@@ -9,6 +9,7 @@
 ## Running locally
 
 To run this application locally on your machine, simply run this command:
+
 ```bash
 npx vite
 ```
