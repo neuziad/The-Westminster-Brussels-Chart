@@ -55,19 +55,23 @@ const groups = [
 // Create a loading manager
 const loadingManager = new THREE.LoadingManager();
 
-// Log progress during loading
+// Log progress during loading and increment progress bar
+const progressBar = document.getElementById("progress-bar");
 loadingManager.onProgress = (url, itemsLoaded, itemsTotal) => {
-    console.log(`Loading file: ${url}. Progress: ${itemsLoaded} of ${itemsTotal} files.`);
+    progressBar.value = (itemsLoaded / itemsTotal) * 100;
+    console.log("Loading file: ${url}. Progress: ${itemsLoaded} of ${itemsTotal} files.");
 };
 
-// Log when all loading is complete
+// Log when all loading is complete and remove progrees bar container
+const progressBarContainer = document.querySelector(".progress-bar-container");
 loadingManager.onLoad = () => {
-    console.log('All resources have been successfully loaded.');
+    progressBarContainer.style.display = "none";
+    console.log("All resources have been successfully loaded.");
 };
 
 // Log if there's an error during loading
 loadingManager.onError = (url) => {
-    console.error(`There was an error loading ${url}`);
+    console.error("There was an error loading ${url}");
 };
 
 // Use the loading manager with TextureLoader
@@ -273,7 +277,7 @@ Papa.parse("/raw.csv", {
             const groupData = dataForm.find(row => row.Groups.trim().toLowerCase() === group.name.trim().toLowerCase());
 
             if (!groupData) {
-                console.error(`No matching data found for group: ${group.name}`);
+                console.error("No matching data found for group: ${group.name}");
                 return;
             }
 
@@ -284,7 +288,7 @@ Papa.parse("/raw.csv", {
                     return sum + parseInt(groupData[key], 10);
                 }, 0);
 
-            console.log(`Group: ${group.name}, Count: ${groupCount}`);
+            console.log("Group: ${group.name}, Count: ${groupCount}");
 
             if (isNaN(groupCount) || groupCount <= 0) {
                 return;
