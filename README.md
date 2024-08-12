@@ -9,6 +9,7 @@
 ## Running locally
 
 To run this application locally on your machine, simply run this command:
+
 ```bash
 npx vite
 ```
@@ -16,3 +17,7 @@ npx vite
 ## Building
 
 WIP
+
+## Sources
+
+All data has been gathered from the [European Parliament's Open Data Portal](https://data.europarl.europa.eu/en/home)
