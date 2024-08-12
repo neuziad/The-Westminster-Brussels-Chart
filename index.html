@@ -4,15 +4,47 @@
 		<meta charset="utf-8">
 		<title>The Westminster-Brussels Chart</title>
 		<style>
-			@import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap');
+			@import url("https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap");
 
 			body { 
                 margin: 0; 
                 overflow: hidden;
 			}
+
+			#text-overlay {
+				position: absolute;
+				mix-blend-mode: difference;
+				color: rgb(56, 56, 56);
+				border-radius: 0.5rem;
+				pointer-events: none;
+				user-select: none;
+				z-index: 2;
+				top: 2%;
+				left: 1%;
+				font-family: "Roboto";
+				font-weight: 700;
+				font-size: 2.5rem;
+			}
+
+			#subtitle {
+				position: absolute;
+				mix-blend-mode: difference;
+				color: rgb(114, 114, 114);
+				border-radius: 0.5rem;
+				pointer-events: none;
+				user-select: none;
+				z-index: 2;
+				top: 7.5%;
+				left: 1%;
+				font-family: "Roboto";
+				font-weight: 400;
+				font-size: 1rem;
+			}
 		</style>
 	</head>
 	<body>
+		<div id="text-overlay">The Westminster-Brussels Chart</div>
+		<div id="subtitle">An interactive chart by github.com/neuziad</div>
 		<script type="module" src="/main.js"></script>
 	</body>
 </html>

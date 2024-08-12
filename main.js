@@ -1,7 +1,8 @@
-import * as THREE from 'three';
-import Papa from 'papaparse';
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
-import { RoundedBoxGeometry } from 'three/examples/jsm/geometries/RoundedBoxGeometry.js';
+import * as THREE from "three";
+import Papa from "papaparse";
+import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
+import { RoundedBoxGeometry } from "three/examples/jsm/geometries/RoundedBoxGeometry.js";
+import { SVGLoader } from "three/examples/jsm/Addons.js";
 
 // Credit console log
 console.log("Project by neuziad");
@@ -33,23 +34,66 @@ scene.add(directionalLight);
 // Set background color to off-white grey
 renderer.setClearColor(0xefefef, 1);
 
+// Create text overlays
+const textOverlay = document.getElementById("text-overlay");
+const subtitle = document.getElementById("subtitle");
+
+// Load graphics explaining controls
+const loader = new SVGLoader();
+loader.load(
+    "/controls.svg",
+    (data) => {
+        const paths = data.paths;
+        const group = new THREE.Group();
+        
+        paths.forEach((path) => {
+            // Convert SVG path to shapes
+            const shapes = path.toShapes(true);
+
+            shapes.forEach((shape) => {
+                const geometry = new THREE.ShapeGeometry(shape);
+                const material = new THREE.MeshBasicMaterial({ color: 0x000000, side: THREE.DoubleSide });
+                const mesh = new THREE.Mesh(geometry, material);
+                group.add(mesh);
+            });
+        });
+
+        // Position the graphic within scene
+        group.position.z = -18;
+        group.position.y = 9;
+        group.position.x = -77;
+        group.scale.set(0.025, 0.025, 0.025);
+        group.rotation.set(1.5, 0, 0);
+        scene.add(group);
+    },
+    (xhr) => {
+        console.log((xhr.loaded / xhr.total) * 100 + "% loaded");
+    },
+    (error) => {
+        console.log(error);
+    }
+);
+
+
 // Add orbit controls
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
 controls.dampingFactor = 0.05;
+controls.minDistance = 10;
+controls.maxDistance = 120;
 
 // EU parliament groups and their colors
 const groups = [
-    { name: 'PPE', color: 0x4db4ff, cubes: [] },
-    { name: 'S&D', color: 0xfd1c36, cubes: [] },
-    { name: 'PfE', color: 0x422b76, cubes: [] },
-    { name: 'ECR', color: 0x4086b9, cubes: [] },
-    { name: 'Renew', color: 0xffe13d, cubes: [] },
-    { name: 'Verts/EFA', color: 0x3ff34e, cubes: [] },
-    { name: 'The Left', color: 0xa03232, cubes: [] },
-    { name: 'ESN', color: 0x13277e, cubes: [] },
-    { name: 'NI', color: 0x777777, cubes: [] },
-    { name: 'Vacant', color: 0xFFFFFF, cubes: [] }
+    { name: "PPE", color: 0x4db4ff, cubes: [] },
+    { name: "S&D", color: 0xfd1c36, cubes: [] },
+    { name: "PfE", color: 0x422b76, cubes: [] },
+    { name: "ECR", color: 0x4086b9, cubes: [] },
+    { name: "Renew", color: 0xffe13d, cubes: [] },
+    { name: "Verts/EFA", color: 0x3ff34e, cubes: [] },
+    { name: "The Left", color: 0xa03232, cubes: [] },
+    { name: "ESN", color: 0x13277e, cubes: [] },
+    { name: "NI", color: 0x777777, cubes: [] },
+    { name: "Vacant", color: 0xFFFFFF, cubes: [] }
 ];
 
 // Pointer move function, allows tracking of cursor for object interaction
@@ -59,47 +103,105 @@ function onPointerMove(event) {
     intersection(event);
 }
 
-window.addEventListener('pointermove', onPointerMove);
+window.addEventListener("pointermove", onPointerMove);
 
 // Handle intersection logic
 let INTERSECTED;
 function intersection(event) {
+
+    // Raycasting
     raycaster.setFromCamera(pointer, camera);
     const intersects = raycaster.intersectObjects(scene.children);
 
     if (intersects.length > 0) {
         const intersectedObject = intersects[0].object;
 
-        if (INTERSECTED != intersectedObject) {
+        if (INTERSECTED !== intersectedObject) {
             if (INTERSECTED) {
+                
+                // Ignores the SVG graphic being rendered in when cursor is hovering over it
+                if (INTERSECTED.userData.group && INTERSECTED.userData.group.cubes) {
+                    INTERSECTED.userData.group.cubes.forEach(cube => {
+                        cube.material.color.set(INTERSECTED.userData.group.color);
+                    });
+                }
+            }
+
+            // When hover over group, highlight colour applied
+            const group = intersectedObject.userData.group;
+
+            if (group && group.cubes) {
+                group.cubes.forEach(cube => {
+                    cube.material.color.set(0xffffae);
+                });
+
+                // Update text overlay content and position
+                textOverlay.textContent = group.name || "The Westminster-Brussels Chart";
+                const vector = new THREE.Vector3();
+                intersectedObject.getWorldPosition(vector);
+
+                switch (group.name) {
+                    case "PPE":
+                        subtitle.textContent = "Group of the European People's Party (Christian Democrats)";
+                        break;
+                    case "S&D":
+                        subtitle.textContent = "Group of the Progressive Alliance of Socialists and Democrats in the European Parliament";
+                        break;
+                    case "PfE":
+                        subtitle.textContent = "Patriots for Europe Group";
+                        break;
+                    case "ECR":
+                        subtitle.textContent = "European Conservatives and Reformists Group";
+                        break;
+                    case "Renew":
+                        subtitle.textContent = "Renew Europe Group";
+                        break;
+                    case "Verts/EFA":
+                        subtitle.textContent = "Group of the Greens/European Free Alliance";
+                        break;
+                    case "The Left":
+                        subtitle.textContent = "The Left group in the European Parliament - GUE/NGL";
+                        break;
+                    case "ESN":
+                        subtitle.textContent = "Europe of Sovereign Nations Group";
+                        break;
+                    case "NI":
+                        subtitle.textContent = "Non-inscrits";
+                        break;
+                    case "Vacant":
+                        subtitle.textContent = "Vacant seat(s)";
+                        break;
+                    default:
+                        subtitle.textContent = "An interactive chart by github.com/neuziad";
+                        break;
+                }
+
+                // Set background colour to group colour overlay
+                renderer.setClearColor(group.color, 0.4);
+                INTERSECTED = intersectedObject;
+            }
+        }
+    } else {
+        if (INTERSECTED) {
+            // Safeguard to check if INTERSECTED has userData.group and cubes
+            if (INTERSECTED.userData.group && INTERSECTED.userData.group.cubes) {
                 INTERSECTED.userData.group.cubes.forEach(cube => {
                     cube.material.color.set(INTERSECTED.userData.group.color);
                 });
             }
 
-            // When hover over group, highlight colour applied
-            const group = intersectedObject.userData.group;
-            group.cubes.forEach(cube => {
-                cube.material.color.set(0xffffae);
-            });
-
-            INTERSECTED = intersectedObject;
-        }
-    } else {
-        if (INTERSECTED) {
-
-            // When not hovering over group, reset colour
-            INTERSECTED.userData.group.cubes.forEach(cube => {
-                cube.material.color.set(INTERSECTED.userData.group.color);
-            });
-
             INTERSECTED = null;
+
+            // Set back to default header text and background colour
+            textOverlay.textContent = "The Westminster-Brussels Chart";
+            subtitle.textContent = "An interactive chart by github.com/neuziad";
+            renderer.setClearColor(0xefefef, 1);
         }
     }
-}    
+}
 
 // Parse the CSV file using Papa Parse
-Papa.parse('/raw.csv', {
+Papa.parse("/raw.csv", {
     download: true,
     header: true,
     complete: function (results) {
@@ -119,9 +221,9 @@ Papa.parse('/raw.csv', {
                 return;
             }
 
-            // Sum the counts across all columns except for 'EUP' (ignoring the 'Groups' column)
+            // Sum the counts across all columns except for "EUP" (ignoring the "Groups" column)
             const groupCount = Object.keys(groupData)
-                .filter(key => key !== 'Groups' && key !== 'EUP')
+                .filter(key => key !== "Groups" && key !== "EUP")
                 .reduce((sum, key) => {
                     return sum + parseInt(groupData[key], 10);
                 }, 0);
@@ -134,7 +236,7 @@ Papa.parse('/raw.csv', {
             
             // Create geometry and material for each cubes (as well as their hitboxes)
             const cubeGeometry = new RoundedBoxGeometry(1, 1, 1, 0.5, 5);
-            const hitboxGeometry = new RoundedBoxGeometry(1.6, 1.6, 1.6, 0.5, 5);
+            const hitboxGeometry = new THREE.BoxGeometry(1.3, 1.3, 1.3);
 
             const cubeMaterial = new THREE.MeshStandardMaterial({ color: group.color });
             const hitboxMaterial = new THREE.MeshBasicMaterial({ visible: false });
@@ -171,7 +273,7 @@ Papa.parse('/raw.csv', {
 });
 
 // Handle window resize
-window.addEventListener('resize', () => {
+window.addEventListener("resize", () => {
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
     renderer.setSize(window.innerWidth, window.innerHeight);
