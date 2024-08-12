@@ -1,0 +1,7 @@
+{
+  "dependencies": {
+    "papaparse": "^5.4.1",
+    "three": "^0.167.1",
+    "three-rounded-box": "^0.1.1"
+  }
+}
