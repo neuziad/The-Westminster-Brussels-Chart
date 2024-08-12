@@ -4,6 +4,7 @@ import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { RoundedBoxGeometry } from "three/examples/jsm/geometries/RoundedBoxGeometry.js";
 import { SVGLoader } from "three/examples/jsm/Addons.js";
 import { TextGeometry } from "three/examples/jsm/Addons.js";
+import { FontLoader } from "three/examples/jsm/loaders/FontLoader.js";
 
 // Credit console log
 console.log("Project by neuziad");
@@ -41,18 +42,19 @@ const subtitle = document.getElementById("subtitle");
 
 // Create EU parliament groups array, listing their colors, cubes that will be crated, and their party's leaders' portrait
 const groups = [
-    { name: "PPE", color: 0x4db4ff, cubes: [], picture: "/portraits/PPE.jpg", notablePerson: "Roberta Metsola, 🇲🇹" },
-    { name: "S&D", color: 0xfd1c36, cubes: [], picture: "/portraits/S&D.jpg", notablePerson: "Iratxe García Pérez, 🇪🇸" },
-    { name: "PfE", color: 0x422b76, cubes: [], picture: "/portraits/PFE.jpg", notablePerson: "Jordan Bardella, 🇫🇷" },
-    { name: "ECR", color: 0x4086b9, cubes: [], picture: "/portraits/ECR.jpg", notablePerson: "Elena Donazzan, 🇮🇹" },
-    { name: "Renew", color: 0xffe13d, cubes: [], picture: "/portraits/RENEW.jpg", notablePerson: "Nikola Minchev, 🇧🇬" },
-    { name: "Verts/EFA", color: 0x3ff34e, cubes: [], picture: "/portraits/VERTS_EFA.jpg", notablePerson: "Bas Eickhout, 🇳🇱" },
-    { name: "The Left", color: 0xa03232, cubes: [], picture: "/portraits/THE_LEFT.jpg", notablePerson: "Kathleen Funchion, 🇮🇪" },
-    { name: "ESN", color: 0x13277e, cubes: [], picture: "/portraits/ESN.jpg", notablePerson: "René Aust, 🇩🇪" },
-    { name: "NI", color: 0x777777, cubes: [], picture: "/portraits/NI.jpg", notablePerson: "Fidias Panayiotou, 🇨🇾" },
-    { name: "Vacant", color: 0xFFFFFF, cubes: [], picture: "/portraits/VACANT.jpg", notablePerson: "Antoni Comín, 🏴󠁥󠁳󠁣󠁴󠁿󠁥 (ES-CT)" },
+    { name: "PPE", color: 0x4db4ff, cubes: [], picture: "/portraits/PPE.jpg", notablePerson: "Roberta Metsola, MT" },
+    { name: "S&D", color: 0xfd1c36, cubes: [], picture: "/portraits/S&D.jpg", notablePerson: "Iratxe García Pérez, ES" },
+    { name: "PfE", color: 0x422b76, cubes: [], picture: "/portraits/PFE.jpg", notablePerson: "Jordan Bardella, FR" },
+    { name: "ECR", color: 0x4086b9, cubes: [], picture: "/portraits/ECR.jpg", notablePerson: "Elena Donazzan, IT" },
+    { name: "Renew", color: 0xffe13d, cubes: [], picture: "/portraits/RENEW.jpg", notablePerson: "Nikola Minchev, BG" },
+    { name: "Verts/EFA", color: 0x3ff34e, cubes: [], picture: "/portraits/VERTS_EFA.jpg", notablePerson: "Bas Eickhout, NL" },
+    { name: "The Left", color: 0xa03232, cubes: [], picture: "/portraits/THE_LEFT.jpg", notablePerson: "Kathleen Funchion, IE" },
+    { name: "ESN", color: 0x13277e, cubes: [], picture: "/portraits/ESN.jpg", notablePerson: "René Aust, DE" },
+    { name: "NI", color: 0x777777, cubes: [], picture: "/portraits/NI.jpg", notablePerson: "Fidias Panayiotou, CY" },
+    { name: "Vacant", color: 0xFFFFFF, cubes: [], picture: "/portraits/VACANT.jpg", notablePerson: "Antoni Comín, ES-CT" },
 ];
 
+// ~~ LOADING MANAGER ~~
 // Create a loading manager
 const loadingManager = new THREE.LoadingManager();
 
@@ -60,20 +62,28 @@ const loadingManager = new THREE.LoadingManager();
 const progressBar = document.getElementById("progress-bar");
 loadingManager.onProgress = (url, itemsLoaded, itemsTotal) => {
     progressBar.value = (itemsLoaded / itemsTotal) * 100;
-    console.log("Loading file: ${url}. Progress: ${itemsLoaded} of ${itemsTotal} files.");
+    console.log(`Loading file: ${url}. Progress: ${itemsLoaded} of ${itemsTotal} files.`);
 };
 
 // Log when all loading is complete and remove progrees bar container
 const progressBarContainer = document.querySelector(".progress-bar-container");
 loadingManager.onLoad = () => {
     progressBarContainer.style.display = "none";
-    console.log("All resources have been successfully loaded.");
+    console.log(`All resources have been successfully loaded.`);
 };
 
 // Log if there's an error during loading
 loadingManager.onError = (url) => {
-    console.error("There was an error loading ${url}");
+    console.error(`There was an error loading ${url}`);
 };
+// ~~ END LOADING MANAGER ~
+
+// Load a font for TextGeometry
+const fontLoader = new FontLoader(loadingManager);
+let font;
+fontLoader.load('/Roboto_Thin_Regular.json', (loadedFont) => {
+    font = loadedFont;
+});
 
 // Use the loading manager with TextureLoader
 const textureLoader = new THREE.TextureLoader(loadingManager);
@@ -108,10 +118,10 @@ svgLoader.load(
         });
 
         // Position the graphic within the scene
-        group.position.z = -17;
+        group.position.z = -10;
         group.position.y = 18;
-        group.position.x = -52;
-        group.scale.set(0.025, 0.025, 0.025);
+        group.position.x = 30;
+        group.scale.set(0.015, 0.015, 0.015);
         group.rotation.set(1.75, 0, 0);
         scene.add(group);
     },
@@ -131,10 +141,30 @@ planeMaterial.map = null;
 planeMaterial.opacity = 0;
 
 // Set scale, rotation and position of portrait plane
-plane.position.set(42, 16, -5);
+plane.position.set(-34.5, 17, -5);
 plane.rotation.set(-1.4, 0, 0);
 plane.scale.set(6, 6, 6);
 scene.add(plane);
+
+// Create text caption for displaying notable person's name
+let notablePersonText;
+function createNotablePersonText(group) {
+    if (font) {
+        const textGeometry = new TextGeometry(group.notablePerson, {
+            font: font,
+            size: 0.4,
+            depth: 0.1,
+        });
+        const textMaterial = new THREE.MeshBasicMaterial({ color: 0x000000 });
+        notablePersonText = new THREE.Mesh(textGeometry, textMaterial);
+
+        scene.add(notablePersonText);
+        notablePersonText.position.set(-29, 16, 0.7);
+        notablePersonText.rotation.set(-1.4, 0, 0);
+        notablePersonText.scale.set(3, 3, 3);
+        
+    }
+}
 
 // Add and set limits for orbit controls
 const controls = new OrbitControls(camera, renderer.domElement);
@@ -171,6 +201,11 @@ function intersection(event) {
                     INTERSECTED.userData.group.cubes.forEach(cube => {
                         cube.material.color.set(INTERSECTED.userData.group.color);
                     });
+                }
+                if (notablePersonText) {
+                    scene.remove(notablePersonText);
+                    notablePersonText.geometry.dispose();
+                    notablePersonText.material.dispose();
                 }
             }
 
@@ -234,11 +269,14 @@ function intersection(event) {
                 } else {
                     planeMaterial.map = null;
                     planeMaterial.opacity = 0;
-                };
+                }
+
+                // Create and position the notable person text
+                createNotablePersonText(group);
 
                 INTERSECTED = intersectedObject;
+            }
         }
-    }
     } else {
         if (INTERSECTED) {
 
@@ -259,9 +297,17 @@ function intersection(event) {
             // Make the plane invisible when no group is hovered
             planeMaterial.map = null;
             planeMaterial.opacity = 0;
+
+            // Remove the notable person text when no group is hovered
+            if (notablePersonText) {
+                scene.remove(notablePersonText);
+                notablePersonText.geometry.dispose();
+                notablePersonText.material.dispose();
+            }
         }
     }
 }
+
 
 // Parse the CSV file using Papa Parse
 Papa.parse("/raw.csv", {
@@ -280,7 +326,7 @@ Papa.parse("/raw.csv", {
             const groupData = dataForm.find(row => row.Groups.trim().toLowerCase() === group.name.trim().toLowerCase());
 
             if (!groupData) {
-                console.error("No matching data found for group: ${group.name}");
+                console.error(`No matching data found for group: ${group.name}`);
                 return;
             }
 
@@ -291,7 +337,7 @@ Papa.parse("/raw.csv", {
                     return sum + parseInt(groupData[key], 10);
                 }, 0);
 
-            console.log("Group: ${group.name}, Count: ${groupCount}");
+            console.log(`Group: ${group.name}, Count: ${groupCount}`);
 
             if (isNaN(groupCount) || groupCount <= 0) {
                 return;
