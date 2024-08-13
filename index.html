@@ -24,6 +24,7 @@
 				font-family: "Roboto";
 				font-weight: 700;
 				font-size: 4.5rem;
+				margin-bottom: 7%;
 			}
 
 			#subtitle {
@@ -34,14 +35,13 @@
 				pointer-events: none;
 				user-select: none;
 				z-index: 2;
-				padding-top: 5%; /* This needs to be more "responsive" */
+				padding-top: 6%;
 				left: 1%;
 				font-family: "Roboto";
 				font-weight: 400;
 				font-size: 2rem;
 			}
 
-			
 			.progress-bar-container {
 				position: absolute;
 				width: 100%;
@@ -66,6 +66,74 @@
 				font-family: 'Roboto';
 				font-weight: '200';
 			}
+
+			.accessibility {
+				right: 2%;
+				position: absolute;
+				z-index: 3;
+				width: 1%;
+				cursor: pointer;
+			}
+
+			@media (max-width: 1184px) {
+				#text-overlay {
+					font-size: 2.5rem;
+				}
+
+				#subtitle {
+					font-size: 1.4rem;
+					padding-top: 7%;
+				}
+
+				.accessibility {
+					right: 4%;
+				}
+			}
+
+			@media (max-width: 790px) {
+				#text-overlay {
+					font-size: 1.4rem;
+				}
+
+				#subtitle {
+					font-size: 0.7rem;
+					padding-top: 6%;
+				}
+
+				.accessibility {
+					right: 6%;
+				}
+			}
+
+			@media (max-width: 480px) {
+				#text-overlay {
+					font-size: 1rem;
+				}
+
+				#subtitle {
+					font-size: 0.8rem;
+					padding-top: 10%;
+				}
+
+				.accessibility {
+					right: 8%;
+				}
+			}
+
+			@media (max-width: 320px) {
+				#text-overlay {
+					font-size: 1.5rem;
+				}
+
+				#subtitle {
+					font-size: 1rem;
+					padding-top: 14%;
+				}
+
+				.accessibility {
+					right: 9%;
+				}
+			}
 		</style>
 	</head>
 	<body>
@@ -73,7 +141,12 @@
 			<label for="progress-bar">Loading assets...</label>
 			<progress id="progress-bar" value="0" max="100"></progress>
 		</div>
-		<div id="text-overlay">The Westminster-Brussels Chart</div>
+		<div>
+			<div id="text-overlay">The Westminster-Brussels Chart</div>
+			<div class="accessibility" onclick="toggleAccessibilityMode()">
+				<img src="/access.svg" alt="Toggle Accessibility">
+			</div>		
+		</div>
 		<div id="subtitle">An interactive chart by github.com/neuziad</div>
 		<div id="portrait"></div>
 		<script type="module" src="/main.js"></script>
