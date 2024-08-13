@@ -1,7 +1,13 @@
 {
-  "dependencies": {
-    "papaparse": "^5.4.1",
-    "three": "^0.167.1",
-    "three-rounded-box": "^0.1.1"
-  }
+    "name": "the-westminster-brussels-chart",
+    "type": "module",
+    "dependencies": {
+        "papaparse": "^5.4.1",
+        "three": "^0.167.1",
+        "three-rounded-box": "^0.1.1"
+    },
+    "devDependencies": {
+        "gh-pages": "^6.1.1",
+        "vite": "^5.4.0"
+    }
 }
