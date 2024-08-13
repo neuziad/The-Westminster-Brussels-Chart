@@ -1,6 +1,12 @@
 {
     "name": "the-westminster-brussels-chart",
     "type": "module",
+    "scripts": {
+        "dev": "vite",
+        "build": "vite build",
+        "serve": "vite preview",
+        "deploy": "gh-pages -d dist"
+    },
     "dependencies": {
         "papaparse": "^5.4.1",
         "three": "^0.167.1",
