@@ -492,11 +492,11 @@ function updateColors() {
     } else {
         // Revert to original colors
         groups.forEach((group) => {
-            group.color = group.originalColor;  // Store the original color in the group object
+            group.color = group.originalColor;
             group.cubes.forEach(cube => cube.material.color.set(group.color));
         });
         specialGroups.forEach((group) => {
-            group.color = group.originalColor;  // Store the original color in the group object
+            group.color = group.originalColor;
             group.cubes.forEach(cube => cube.material.color.set(group.color));
         });
     }
