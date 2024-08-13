@@ -189,9 +189,6 @@ svgLoader.load(
         group.scale.set(0.015, 0.015, 0.015);
         group.rotation.set(1.75, 0, 0);
         scene.add(group);
-    },
-    (error) => {
-        console.log("Error loading SVG: ", error);
     }
 );
 // ~~ END LOADERS ~~
@@ -216,9 +213,9 @@ window.addEventListener("resize", () => {
 
 // ~~ INTERSECTION HANDLER ~~
 let INTERSECTED;
-function intersection(event) {
 
-    // Raycasting
+// Handle hovering intersection logic
+function intersection() {
     raycaster.setFromCamera(pointer, camera);
     const intersects = raycaster.intersectObjects(scene.children);
 
@@ -227,138 +224,129 @@ function intersection(event) {
 
         if (INTERSECTED !== intersectedObject) {
             if (INTERSECTED) {
-
-                // Ignore the SVG graphic when cursor is hovering over it
-                if (INTERSECTED.userData.group && INTERSECTED.userData.group.cubes) {
-                    INTERSECTED.userData.group.cubes.forEach(cube => {
-                        cube.material.color.set(INTERSECTED.userData.group.color);
-                    });
-                }
-                if (notablePersonText) {
-                    scene.remove(notablePersonText);
-                    notablePersonText.geometry.dispose();
-                    notablePersonText.material.dispose();
-                }
-                if (titleText) {
-                    scene.remove(titleText);
-                    titleText.geometry.dispose();
-                    titleText.material.dispose();
-                }
+                resetGroupColor(INTERSECTED);
+                clearText();
             }
 
-            // When hovering over a group, apply the highlight color
             const group = intersectedObject.userData.group;
 
             if (group && group.cubes) {
-                group.cubes.forEach(cube => {
-                    cube.material.color.set(0xffffae);
-                });
-
-                // Update text overlay content and position
-                textOverlay.textContent = group.name || "The Westminster-Brussels Chart";
-                const vector = new THREE.Vector3();
-                intersectedObject.getWorldPosition(vector);
-
-                switch (group.name) {
-                    case "PPE":
-                        subtitle.textContent = "Group of the European People's Party (Christian Democrats)";
-                        break;
-                    case "S&D":
-                        subtitle.textContent = "Group of the Progressive Alliance of Socialists and Democrats in the European Parliament";
-                        break;
-                    case "PfE":
-                        subtitle.textContent = "Patriots for Europe Group";
-                        break;
-                    case "ECR":
-                        subtitle.textContent = "European Conservatives and Reformists Group";
-                        break;
-                    case "Renew":
-                        subtitle.textContent = "Renew Europe Group";
-                        break;
-                    case "Verts/EFA":
-                        subtitle.textContent = "Group of the Greens/European Free Alliance";
-                        break;
-                    case "The Left":
-                        subtitle.textContent = "The Left group in the European Parliament - GUE/NGL";
-                        break;
-                    case "ESN":
-                        subtitle.textContent = "Europe of Sovereign Nations Group";
-                        break;
-                    case "NI":
-                        subtitle.textContent = "Non-inscrits";
-                        break;
-                    case "Vacant":
-                        subtitle.textContent = "Seat left vacant in parliament";
-                        break;
-                    case "European Commission":
-                        subtitle.textContent = "The executive arm of the European Union";
-                        break;
-                    case "Council of the EU":
-                        subtitle.textContent = "Not to be confused with the European Council.";
-                        break;
-                    default:
-                        subtitle.textContent = "An interactive chart by github.com/neuziad";
-                        break;
-                }
-
-                // Set background color to group color overlay
-                renderer.setClearColor(group.color, 0.4);
-
-                // Set the portrait
-                if (portraits[group.name]) {
-                    planeMaterial.map = portraits[group.name];
-                    planeMaterial.opacity = 1;
-                    planeMaterial.needsUpdate = true;
-                } else {
-                    planeMaterial.map = null;
-                    planeMaterial.opacity = 0;
-                }
-
-                // Create and position the notable person text
+                highlightGroup(group);
+                updateOverlay(group);
                 createNotablePersonText(group);
-
                 INTERSECTED = intersectedObject;
             }
         }
     } else {
         if (INTERSECTED) {
-
-            // Safeguard to check if INTERSECTED has userData.group and cubes
-            if (INTERSECTED.userData.group && INTERSECTED.userData.group.cubes) {
-                INTERSECTED.userData.group.cubes.forEach(cube => {
-                    cube.material.color.set(INTERSECTED.userData.group.color);
-                });
-            }
-
+            resetGroupColor(INTERSECTED);
+            clearText();
+            resetOverlay();
             INTERSECTED = null;
-
-            // Set back to default header text and background color
-            textOverlay.textContent = "The Westminster-Brussels Chart";
-            subtitle.textContent = "An interactive chart by github.com/neuziad";
-            renderer.setClearColor(0xefefef, 1);
-
-            // Make the plane invisible when no group is hovered
-            planeMaterial.map = null;
-            planeMaterial.opacity = 0;
-
-            // Remove the notable person text when no group is hovered
-            if (notablePersonText) {
-                scene.remove(notablePersonText);
-                notablePersonText.geometry.dispose();
-                notablePersonText.material.dispose();
-            }
-
-            if (titleText) {
-                scene.remove(titleText);
-                titleText.geometry.dispose();
-                titleText.material.dispose();
-            }
         }
     }
 }
+
+// Resets the color of all cubes in a group
+function resetGroupColor(object) {
+    if (object.userData.group && object.userData.group.cubes) {
+        object.userData.group.cubes.forEach(cube => {
+            cube.material.color.set(object.userData.group.color);
+        });
+    }
+}
+
+// Clears text geometry elements when called
+function clearText() {
+    if (notablePersonText) {
+        scene.remove(notablePersonText);
+        notablePersonText.geometry.dispose();
+        notablePersonText.material.dispose();
+    }
+
+    if (titleText) {
+        scene.remove(titleText);
+        titleText.geometry.dispose();
+        titleText.material.dispose();
+    }
+}
+
+// Changes colour of group of cubes with highlight colour
+function highlightGroup(group) {
+    group.cubes.forEach(cube => {
+        cube.material.color.set(0xffffae);
+    });
+}
+
+// Updates HTML text overlay
+function updateOverlay(group) {
+    textOverlay.textContent = group.name || "The Westminster-Brussels Chart";
+    renderer.setClearColor(group.color, 0.4);
+
+    if (portraits[group.name]) {
+        planeMaterial.map = portraits[group.name];
+        planeMaterial.opacity = 1;
+        planeMaterial.needsUpdate = true;
+    } else {
+        planeMaterial.map = null;
+        planeMaterial.opacity = 0;
+    }
+
+    switch (group.name) {
+        case "PPE":
+            subtitle.textContent = "Group of the European People's Party (Christian Democrats)";
+            break;
+        case "S&D":
+            subtitle.textContent = "Group of the Progressive Alliance of Socialists and Democrats in the European Parliament";
+            break;
+        case "PfE":
+            subtitle.textContent = "Patriots for Europe Group";
+            break;
+        case "ECR":
+            subtitle.textContent = "European Conservatives and Reformists Group";
+            break;
+        case "Renew":
+            subtitle.textContent = "Renew Europe Group";
+            break;
+        case "Verts/EFA":
+            subtitle.textContent = "Group of the Greens/European Free Alliance";
+            break;
+        case "The Left":
+            subtitle.textContent = "The Left group in the European Parliament - GUE/NGL";
+            break;
+        case "ESN":
+            subtitle.textContent = "Europe of Sovereign Nations Group";
+            break;
+        case "NI":
+            subtitle.textContent = "Non-inscrits";
+            break;
+        case "Vacant":
+            subtitle.textContent = "Seat left vacant in parliament";
+            break;
+        case "European Commission":
+            subtitle.textContent = "The executive arm of the European Union";
+            break;
+        case "Council of the EU":
+            subtitle.textContent = "Not to be confused with the European Council.";
+            break;
+        default:
+            subtitle.textContent = "An interactive chart by github.com/neuziad";
+            break;
+    };
+};
+
+// Resets HTML text overlay
+function resetOverlay() {
+    textOverlay.textContent = "The Westminster-Brussels Chart";
+    subtitle.textContent = "An interactive chart by github.com/neuziad";
+    renderer.setClearColor(0xefefef, 1);
+    planeMaterial.map = null;
+    planeMaterial.opacity = 0;
+    planeMaterial.needsUpdate = true;
+}
 // ~~ END INTERSECTION HANDLER ~~
 
-// ~~ PARSER ~~
+// ~~ CSV DATA PARSER ~~
 Papa.parse("/raw.csv", {
     download: true,
     header: true,
@@ -476,18 +464,56 @@ Papa.parse("/raw.csv", {
         animate();
     }
 });
-// ~~ END PARSER ~~
+// ~~ END CSV DATA PARSER ~~
+
+// ~~ ACCESSIBILITY MODE ~~
+let isAccessibilityMode = false;
+
+window.toggleAccessibilityMode = function() {
+    isAccessibilityMode = !isAccessibilityMode;
+    updateColors();
+}
+
+function updateColors() {
+    const colorblindColors = [
+        0xffc20a, 0x994f00, 0x40b0a6, 0xe66100, 0x4b0092, 0xfefe62, 0x005ab5, 0x1a85ff, 0xffffff, 0x000000,
+        0xf9a967, 0x0a275f
+    ];
+
+    if (isAccessibilityMode) {
+        groups.forEach((group, index) => {
+            group.color = colorblindColors[index];
+            group.cubes.forEach(cube => cube.material.color.set(group.color));
+        });
+        specialGroups.forEach((group, index) => {
+            group.color = colorblindColors[index + groups.length];
+            group.cubes.forEach(cube => cube.material.color.set(group.color));
+        });
+    } else {
+        // Revert to original colors
+        groups.forEach((group) => {
+            group.color = group.originalColor;  // Store the original color in the group object
+            group.cubes.forEach(cube => cube.material.color.set(group.color));
+        });
+        specialGroups.forEach((group) => {
+            group.color = group.originalColor;  // Store the original color in the group object
+            group.cubes.forEach(cube => cube.material.color.set(group.color));
+        });
+    }
+}
+
+// Store the original color in the group object for later use
+groups.forEach(group => {
+    group.originalColor = group.color;
+});
+specialGroups.forEach(group => {
+    group.originalColor = group.color;
+});
+// ~~ END ACCESSIBILITY MODE ~~
 
 // ~~ ANIMATION LOOP ~~
 function animate() {
     requestAnimationFrame(animate);
-
-    groups.forEach(group => {
-        group.cubes.forEach(cube => {
-            cube.rotation.y -= 0.002;
-            cube.rotation.z -= 0.00001;
-        });
-    });
 
     controls.update();
     renderer.render(scene, camera);
