@@ -54,6 +54,11 @@ const groups = [
     { name: "Vacant", color: 0xFFFFFF, cubes: [], picture: "/portraits/VACANT.jpg", notablePerson: "Antoni Comín, ES-CT" },
 ];
 
+const specialGroups = [
+    { name: "European Commission", color: 0xf67003, cubes: [], picture: "/portraits/EC.jpg", notablePerson: "Ursula von der Leyen, DE" },
+    { name: "Council of the EU", color: 0x2284a1, cubes: [], picture: "/portraits/COUNCIL.jpg", notablePerson: "Hungary, HU" },
+];
+
 // ~~ LOADING MANAGER ~~
 // Create a loading manager
 const loadingManager = new THREE.LoadingManager();
@@ -89,7 +94,7 @@ fontLoader.load('/Roboto_Thin_Regular.json', (loadedFont) => {
 const textureLoader = new THREE.TextureLoader(loadingManager);
 
 // Load portrait images
-const portraits = groups.reduce((acc, group) => {
+const portraits = [...groups, ...specialGroups].reduce((acc, group) => {
     if (group.picture) {
         const portrait = textureLoader.load(group.picture);
         acc[group.name] = portrait;
@@ -148,6 +153,7 @@ scene.add(plane);
 
 // Create text caption for displaying notable person's name
 let notablePersonText;
+let titleText;
 function createNotablePersonText(group) {
     if (font) {
         const textGeometry = new TextGeometry(group.notablePerson, {
@@ -162,7 +168,27 @@ function createNotablePersonText(group) {
         notablePersonText.position.set(-29, 16, 0.7);
         notablePersonText.rotation.set(-1.4, 0, 0);
         notablePersonText.scale.set(3, 3, 3);
-        
+
+        let titleTextOptions;
+
+        if (group.name === "European Commission" || group.name === "Council of the EU") {
+            titleTextOptions = "Presidency"
+        } else if (group.name === "Vacant") {
+            titleTextOptions = "Vacant member"
+        } else {
+            titleTextOptions = "Notable member"
+        }
+
+        const titleTextGeometry = new TextGeometry(titleTextOptions, {
+            font: font,
+            size: 0.4,
+            depth: 0.1,
+        });
+        titleText = new THREE.Mesh(titleTextGeometry, textMaterial);
+        scene.add(titleText);
+        titleText.position.set(-29, 16.5, -1);
+        titleText.rotation.set(-1.4, 0, 0);
+        titleText.scale.set(2, 2, 2);
     }
 }
 
@@ -195,8 +221,8 @@ function intersection(event) {
 
         if (INTERSECTED !== intersectedObject) {
             if (INTERSECTED) {
-                
-                // Ignores the SVG graphic being rendered in when cursor is hovering over it
+
+                // Ignore the SVG graphic when cursor is hovering over it
                 if (INTERSECTED.userData.group && INTERSECTED.userData.group.cubes) {
                     INTERSECTED.userData.group.cubes.forEach(cube => {
                         cube.material.color.set(INTERSECTED.userData.group.color);
@@ -207,9 +233,14 @@ function intersection(event) {
                     notablePersonText.geometry.dispose();
                     notablePersonText.material.dispose();
                 }
+                if (titleText) {
+                    scene.remove(titleText);
+                    titleText.geometry.dispose();
+                    titleText.material.dispose();
+                }
             }
 
-            // When hover over group, highlight colour applied
+            // When hovering over a group, apply the highlight color
             const group = intersectedObject.userData.group;
 
             if (group && group.cubes) {
@@ -251,14 +282,20 @@ function intersection(event) {
                         subtitle.textContent = "Non-inscrits";
                         break;
                     case "Vacant":
-                        subtitle.textContent = "Vacant seat(s)";
+                        subtitle.textContent = "Seat left vacant in parliament";
+                        break;
+                    case "European Commission":
+                        subtitle.textContent = "The executive arm of the European Union";
+                        break;
+                    case "Council of the EU":
+                        subtitle.textContent = "Not to be confused with the European Council.";
                         break;
                     default:
                         subtitle.textContent = "An interactive chart by github.com/neuziad";
                         break;
                 }
 
-                // Set background colour to group colour overlay
+                // Set background color to group color overlay
                 renderer.setClearColor(group.color, 0.4);
 
                 // Set the portrait
@@ -289,7 +326,7 @@ function intersection(event) {
 
             INTERSECTED = null;
 
-            // Set back to default header text and background colour
+            // Set back to default header text and background color
             textOverlay.textContent = "The Westminster-Brussels Chart";
             subtitle.textContent = "An interactive chart by github.com/neuziad";
             renderer.setClearColor(0xefefef, 1);
@@ -303,6 +340,12 @@ function intersection(event) {
                 scene.remove(notablePersonText);
                 notablePersonText.geometry.dispose();
                 notablePersonText.material.dispose();
+            }
+
+            if (titleText) {
+                scene.remove(titleText);
+                titleText.geometry.dispose();
+                titleText.material.dispose();
             }
         }
     }
@@ -320,9 +363,8 @@ Papa.parse("/raw.csv", {
         let gridHeight = 10;
         let spacing = 1.2;
 
+        // Parse and render main groups
         groups.forEach((group) => {
-
-            // Find the corresponding row for the group in the CSV data
             const groupData = dataForm.find(row => row.Groups.trim().toLowerCase() === group.name.trim().toLowerCase());
 
             if (!groupData) {
@@ -330,7 +372,6 @@ Papa.parse("/raw.csv", {
                 return;
             }
 
-            // Sum the counts across all columns except for "EUP" (ignoring the "Groups" column)
             const groupCount = Object.keys(groupData)
                 .filter(key => key !== "Groups" && key !== "EUP")
                 .reduce((sum, key) => {
@@ -342,15 +383,12 @@ Papa.parse("/raw.csv", {
             if (isNaN(groupCount) || groupCount <= 0) {
                 return;
             }        
-            
-            // Create geometry and material for each cubes (as well as their hitboxes)
+
             const cubeGeometry = new RoundedBoxGeometry(1, 1, 1, 0.5, 5);
             const hitboxGeometry = new THREE.BoxGeometry(1.3, 1.3, 1.3);
-
             const cubeMaterial = new THREE.MeshStandardMaterial({ color: group.color });
             const hitboxMaterial = new THREE.MeshBasicMaterial({ visible: false });
             
-            // Generates cubes for every member of each group
             for (let i = 0; i < groupCount; i++) {
                 const cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
                 const hitbox = new THREE.Mesh(hitboxGeometry, hitboxMaterial);
@@ -361,8 +399,7 @@ Papa.parse("/raw.csv", {
                 scene.add(cube);
                 scene.add(hitbox);
                 group.cubes.push(cube);
-                
-                // Position cubes in grid-like fashion
+
                 const x = Math.floor(index / gridHeight) * spacing;
                 const z = (index % gridHeight) * spacing;
 
@@ -376,10 +413,67 @@ Papa.parse("/raw.csv", {
             }
         });
 
+        // Reset index and adjust position for the special groups
+        index = 0;
+        let specialGridHeight = 5;
+        let specialSpacing = 1.3;
+
+        // Parse and render special groups
+        specialGroups.forEach((group) => {
+            const groupData = dataForm.find(row => row.Groups.trim().toLowerCase() === group.name.trim().toLowerCase());
+
+            if (!groupData) {
+                console.error(`No matching data found for group: ${group.name}`);
+                return;
+            }
+
+            const groupCount = Object.keys(groupData)
+                .filter(key => key !== "Groups" && key !== "EUP")
+                .reduce((sum, key) => {
+                    return sum + parseInt(groupData[key], 10);
+                }, 0);
+
+            console.log(`Special Group: ${group.name}, Count: ${groupCount}`);
+
+            if (isNaN(groupCount) || groupCount <= 0) {
+                return;
+            }        
+
+            const cubeGeometry = new RoundedBoxGeometry(1, 1, 1, 0.5, 5);
+            const hitboxGeometry = new THREE.BoxGeometry(1.3, 1.3, 1.3);
+            const cubeMaterial = new THREE.MeshStandardMaterial({ color: group.color });
+            const hitboxMaterial = new THREE.MeshBasicMaterial({ visible: false });
+            
+            for (let i = 0; i < groupCount; i++) {
+                const cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
+                const hitbox = new THREE.Mesh(hitboxGeometry, hitboxMaterial);
+
+                cube.userData.group = group;
+                hitbox.userData.group = group;
+
+                scene.add(cube);
+                scene.add(hitbox);
+                group.cubes.push(cube);
+
+                // Position cubes in a separate grid on the opposite side
+                const x = Math.floor(index / specialGridHeight) * specialSpacing;
+                const z = (index % specialGridHeight) * specialSpacing;
+
+                cube.position.set(x - 39, 15, z + 15);
+                hitbox.position.set(x - 39, 15, z + 15);
+
+                cube.castShadow = true;
+                cube.receiveShadow = true;
+
+                index++;
+            }
+        });
+
         // Start animation loop
         animate();
     }
 });
+
 
 // Handle window resize
 window.addEventListener("resize", () => {
