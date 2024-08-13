@@ -74,7 +74,7 @@ function createNotablePersonText(group) {
         let titleTextOptions;
 
         if (group.name === "European Commission" || group.name === "Council of the EU") {
-            titleTextOptions = "Presidency"
+            titleTextOptions = "President"
         } else if (group.name === "Vacant") {
             titleTextOptions = "Vacant seat"
         } else {
@@ -128,14 +128,12 @@ const loadingManager = new THREE.LoadingManager();
 const progressBar = document.getElementById("progress-bar");
 loadingManager.onProgress = (url, itemsLoaded, itemsTotal) => {
     progressBar.value = (itemsLoaded / itemsTotal) * 100;
-    console.log(`Loading file: ${url}. Progress: ${itemsLoaded} of ${itemsTotal} files.`);
 };
 
 // Log when all loading is complete and remove progrees bar container
 const progressBarContainer = document.querySelector(".progress-bar-container");
 loadingManager.onLoad = () => {
     progressBarContainer.style.display = "none";
-    console.log(`All resources have been successfully loaded.`);
 };
 
 // Log if there's an error during loading
@@ -191,9 +189,6 @@ svgLoader.load(
         group.scale.set(0.015, 0.015, 0.015);
         group.rotation.set(1.75, 0, 0);
         scene.add(group);
-    },
-    (xhr) => {
-        console.log("SVG graphics: " + (xhr.loaded / xhr.total) * 100 + "% loaded");
     },
     (error) => {
         console.log("Error loading SVG: ", error);
@@ -389,7 +384,6 @@ Papa.parse("/raw.csv", {
                     return sum + parseInt(groupData[key], 10);
                 }, 0);
 
-            console.log(`Group: ${group.name}, Count: ${groupCount}`);
 
             if (isNaN(groupCount) || groupCount <= 0) {
                 return;
@@ -443,8 +437,6 @@ Papa.parse("/raw.csv", {
                 .reduce((sum, key) => {
                     return sum + parseInt(groupData[key], 10);
                 }, 0);
-
-            console.log(`Special Group: ${group.name}, Count: ${groupCount}`);
 
             if (isNaN(groupCount) || groupCount <= 0) {
                 return;
