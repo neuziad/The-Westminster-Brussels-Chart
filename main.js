@@ -40,6 +40,67 @@ renderer.setClearColor(0xefefef, 1);
 const textOverlay = document.getElementById("text-overlay");
 const subtitle = document.getElementById("subtitle");
 
+// Create a plane geometry for the portrait image
+const planeGeometry = new THREE.PlaneGeometry(1.6, 2);
+const planeMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff, side: THREE.DoubleSide, transparent: true });
+const plane = new THREE.Mesh(planeGeometry, planeMaterial);
+planeMaterial.map = null;
+planeMaterial.opacity = 0;
+
+// Set scale, rotation and position of portrait plane
+plane.position.set(-34.5, 17, -5);
+plane.rotation.set(-1.4, 0, 0);
+plane.scale.set(6, 6, 6);
+scene.add(plane);
+
+// Create text caption for displaying notable person's name
+let notablePersonText;
+let titleText;
+function createNotablePersonText(group) {
+    if (font) {
+        const textGeometry = new TextGeometry(group.notablePerson, {
+            font: font,
+            size: 0.4,
+            depth: 0.1,
+        });
+        const textMaterial = new THREE.MeshBasicMaterial({ color: 0x000000 });
+        notablePersonText = new THREE.Mesh(textGeometry, textMaterial);
+
+        scene.add(notablePersonText);
+        notablePersonText.position.set(-29, 16, 0.7);
+        notablePersonText.rotation.set(-1.4, 0, 0);
+        notablePersonText.scale.set(3, 3, 3);
+
+        let titleTextOptions;
+
+        if (group.name === "European Commission" || group.name === "Council of the EU") {
+            titleTextOptions = "Presidency"
+        } else if (group.name === "Vacant") {
+            titleTextOptions = "Vacant seat"
+        } else {
+            titleTextOptions = "Notable member"
+        }
+
+        const titleTextGeometry = new TextGeometry(titleTextOptions, {
+            font: font,
+            size: 0.4,
+            depth: 0.1,
+        });
+        titleText = new THREE.Mesh(titleTextGeometry, textMaterial);
+        scene.add(titleText);
+        titleText.position.set(-29, 16.5, -1);
+        titleText.rotation.set(-1.4, 0, 0);
+        titleText.scale.set(2, 2, 2);
+    }
+}
+
+// Add and set limits for orbit controls
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true;
+controls.dampingFactor = 0.05;
+controls.minDistance = 10;
+controls.maxDistance = 120;
+
 // Create EU parliament groups array, listing their colors, cubes that will be crated, and their party's leaders' portrait
 const groups = [
     { name: "PPE", color: 0x4db4ff, cubes: [], picture: "/portraits/PPE.jpg", notablePerson: "Roberta Metsola, MT" },
@@ -83,6 +144,7 @@ loadingManager.onError = (url) => {
 };
 // ~~ END LOADING MANAGER ~
 
+// ~~ LOADERS ~~
 // Load a font for TextGeometry
 const fontLoader = new FontLoader(loadingManager);
 let font;
@@ -137,68 +199,9 @@ svgLoader.load(
         console.log("Error loading SVG: ", error);
     }
 );
+// ~~ END LOADERS ~~
 
-// Create a plane geometry for the portrait image
-const planeGeometry = new THREE.PlaneGeometry(1.6, 2);
-const planeMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff, side: THREE.DoubleSide, transparent: true });
-const plane = new THREE.Mesh(planeGeometry, planeMaterial);
-planeMaterial.map = null;
-planeMaterial.opacity = 0;
-
-// Set scale, rotation and position of portrait plane
-plane.position.set(-34.5, 17, -5);
-plane.rotation.set(-1.4, 0, 0);
-plane.scale.set(6, 6, 6);
-scene.add(plane);
-
-// Create text caption for displaying notable person's name
-let notablePersonText;
-let titleText;
-function createNotablePersonText(group) {
-    if (font) {
-        const textGeometry = new TextGeometry(group.notablePerson, {
-            font: font,
-            size: 0.4,
-            depth: 0.1,
-        });
-        const textMaterial = new THREE.MeshBasicMaterial({ color: 0x000000 });
-        notablePersonText = new THREE.Mesh(textGeometry, textMaterial);
-
-        scene.add(notablePersonText);
-        notablePersonText.position.set(-29, 16, 0.7);
-        notablePersonText.rotation.set(-1.4, 0, 0);
-        notablePersonText.scale.set(3, 3, 3);
-
-        let titleTextOptions;
-
-        if (group.name === "European Commission" || group.name === "Council of the EU") {
-            titleTextOptions = "Presidency"
-        } else if (group.name === "Vacant") {
-            titleTextOptions = "Vacant member"
-        } else {
-            titleTextOptions = "Notable member"
-        }
-
-        const titleTextGeometry = new TextGeometry(titleTextOptions, {
-            font: font,
-            size: 0.4,
-            depth: 0.1,
-        });
-        titleText = new THREE.Mesh(titleTextGeometry, textMaterial);
-        scene.add(titleText);
-        titleText.position.set(-29, 16.5, -1);
-        titleText.rotation.set(-1.4, 0, 0);
-        titleText.scale.set(2, 2, 2);
-    }
-}
-
-// Add and set limits for orbit controls
-const controls = new OrbitControls(camera, renderer.domElement);
-controls.enableDamping = true;
-controls.dampingFactor = 0.05;
-controls.minDistance = 10;
-controls.maxDistance = 120;
-
+// ~~ EVENT LISTENERS ~~
 // Pointer move function, allows tracking of cursor for object interaction
 function onPointerMove(event) {
     pointer.x = (event.clientX / window.innerWidth) * 2 - 1;
@@ -208,7 +211,15 @@ function onPointerMove(event) {
 
 window.addEventListener("pointermove", onPointerMove);
 
-// Handle intersection logic
+// Handle window resize
+window.addEventListener("resize", () => {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+});
+// ~~ END EVENT LISTENERS ~~
+
+// ~~ INTERSECTION HANDLER ~~
 let INTERSECTED;
 function intersection(event) {
 
@@ -350,9 +361,9 @@ function intersection(event) {
         }
     }
 }
+// ~~ END INTERSECTION HANDLER ~~
 
-
-// Parse the CSV file using Papa Parse
+// ~~ PARSER ~~
 Papa.parse("/raw.csv", {
     download: true,
     header: true,
@@ -473,16 +484,9 @@ Papa.parse("/raw.csv", {
         animate();
     }
 });
+// ~~ END PARSER ~~
 
-
-// Handle window resize
-window.addEventListener("resize", () => {
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
-    renderer.setSize(window.innerWidth, window.innerHeight);
-});
-
-// Animation loop
+// ~~ ANIMATION LOOP ~~
 function animate() {
     requestAnimationFrame(animate);
 
@@ -496,3 +500,4 @@ function animate() {
     controls.update();
     renderer.render(scene, camera);
 }
+// ~~ END ANIMATION LOOP ~~
