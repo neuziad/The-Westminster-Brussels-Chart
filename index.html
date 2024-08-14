@@ -23,7 +23,7 @@
 				left: 1%;
 				font-family: "Roboto";
 				font-weight: 700;
-				font-size: 4.5rem;
+				font-size: clamp(2rem, 5vw, 4rem);
 				margin-bottom: 7%;
 			}
 
@@ -39,7 +39,8 @@
 				left: 1%;
 				font-family: "Roboto";
 				font-weight: 400;
-				font-size: 2rem;
+				font-size: clamp(1rem, 3vw, 2rem);
+				top: clamp(1rem, 2vw, 1rem);
 			}
 
 			.progress-bar-container {
@@ -67,22 +68,24 @@
 				font-weight: '200';
 			}
 
-			.accessibility {
-				right: 1.5%;
-				top: 1%;
-				position: absolute;
-				z-index: 3;
-				width: 1%;
+			.accessibility img,
+			.git img {
+				width: 3rem;
 				cursor: pointer;
 			}
 
-			.git {
-				right: 3.5%;
-				top: 1%;
+			.icon-grid {
 				position: absolute;
+				top: 1.5%;
+				right: 1%;
+				display: flex;
+				align-items: center;
 				z-index: 3;
-				width: 1%;
-				cursor: pointer;
+			}
+
+			.icon-wrapper {
+				display: flex;
+				gap: 0.2rem;
 			}
 
 			@media (max-width: 1184px) {
@@ -93,14 +96,6 @@
 				#subtitle {
 					font-size: 1.4rem;
 					padding-top: 7%;
-				}
-
-				.accessibility {
-					right: 4%;
-				}
-
-				.git {
-					right: 8%;
 				}
 			}
 
@@ -159,15 +154,17 @@
 			<label for="progress-bar">Loading assets...</label>
 			<progress id="progress-bar" value="0" max="100"></progress>
 		</div>
-		<div>
-			<div id="text-overlay">The Westminster-Brussels Chart</div>
-			<div class="accessibility" onclick="toggleAccessibilityMode()">
-				<img src="/access.svg" alt="Toggle Accessibility">
-			</div>
-			<div class="git">
-				<a href="https://github.com/neuziad/The-Westminster-Brussels-Chart">
-					<img src="/git.svg" alt="View repository on GitHub">
-				</a>
+		<div id="text-overlay">The Westminster-Brussels Chart</div>
+		<div class="icon-grid">
+			<div class="icon-wrapper">
+				<div class="accessibility" onclick="toggleAccessibilityMode()">
+					<img src="/access.svg" alt="Toggle Accessibility">
+				</div>
+				<div class="git">
+					<a href="https://github.com/neuziad/The-Westminster-Brussels-Chart">
+						<img src="/git.svg" alt="View repository on GitHub">
+					</a>
+				</div>
 			</div>
 		</div>
 		<div id="subtitle">An interactive chart by github.com/neuziad</div>
