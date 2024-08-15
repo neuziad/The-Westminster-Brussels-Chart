@@ -4,8 +4,7 @@
     "scripts": {
         "dev": "vite",
         "build": "vite build",
-        "serve": "vite preview",
-        "deploy": "gh-pages -d dist"
+        "preview": "vite preview"
     },
     "dependencies": {
         "papaparse": "^5.4.1",
@@ -13,7 +12,6 @@
         "three-rounded-box": "^0.1.1"
     },
     "devDependencies": {
-        "gh-pages": "^6.1.1",
         "vite": "^5.4.0"
     }
 }
