@@ -124,11 +124,12 @@ const specialGroups = [
 // Create a loading manager
 const loadingManager = new THREE.LoadingManager();
 
+// DEPRECATED:
 // Log progress during loading and increment progress bar
-const progressBar = document.getElementById("progress-bar");
-loadingManager.onProgress = (url, itemsLoaded, itemsTotal) => {
-    progressBar.value = (itemsLoaded / itemsTotal) * 100;
-};
+// const progressBar = document.getElementById("progress-bar");
+// loadingManager.onProgress = (url, itemsLoaded, itemsTotal) => {
+//     progressBar.value = (itemsLoaded / itemsTotal) * 100;
+// };
 
 // Log when all loading is complete and remove progrees bar container
 const progressBarContainer = document.querySelector(".progress-bar-container");
