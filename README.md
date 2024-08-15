@@ -44,6 +44,7 @@ There's a slight chance I won't ever get around to these but, either way, here a
 
 - [ ] Mobile compatibility
 - [ ] More comprehensive data: have each seat display individual MEPs
+- [ ] Filtering seats by country
 - [ ] Individual pages for each parliamentary group: explaining the ideologies and philosophies each parliamentary groups have in common and their general voting record.
 
 This project is open-source, so if you would like to implement these features yourself, or you would like to create your own variations of the chart in 3D space, go ahead and clone the project!
