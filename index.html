@@ -176,22 +176,28 @@
 				animation: spin 6s linear infinite;
 			}
 		</style>
+
+		<link rel="icon" href="favicon.ico" type="image/x-icon">
 	</head>
 	<body>
 		<div class="progress-bar-container">
 			<img src="stars.svg" alt="Loading stars" class="spinning-stars">
 			<label for="progress-bar" class="loading-label">Loading...</label>
 		</div>
-		<div id="text-overlay">The Westminster-Brussels Chart</div>
-		<div class="icon-grid">
-			<div class="icon-wrapper">
-				<div class="accessibility" onclick="toggleAccessibilityMode()">
-					<img src="/access.svg" alt="Toggle Accessibility">
-				</div>
-				<div class="git">
-					<a href="https://github.com/neuziad/The-Westminster-Brussels-Chart">
-						<img src="/git.svg" alt="View repository on GitHub">
-					</a>
+		<div class="flip-container">
+			<div class="content">
+				<div id="text-overlay">The Westminster-Brussels Chart</div>
+				<div class="icon-grid">
+					<div class="icon-wrapper">
+						<div class="accessibility" onclick="toggleAccessibilityMode()">
+							<img src="/access.svg" alt="Toggle Accessibility">
+						</div>
+						<div class="git">
+							<a href="https://github.com/neuziad/The-Westminster-Brussels-Chart">
+								<img src="/git.svg" alt="View repository on GitHub">
+							</a>
+						</div>
+					</div>
 				</div>
 			</div>
 		</div>

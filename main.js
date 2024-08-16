@@ -512,6 +512,31 @@ specialGroups.forEach(group => {
 });
 // ~~ END ACCESSIBILITY MODE ~~
 
+// ~~ MOBILE SCREEN OPTIMISATIONS ~~
+if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+    
+    // Set new scene and camera positions
+    scene.rotation.y = -(Math.PI / 2);
+    scene.rotation.x -= 50;
+    camera.position.y += 20;
+    camera.position.z += 30;
+
+    // Add CSS transformations to flip elements and position them at top right corner
+    const flipContainer = document.querySelector('.flip-container');
+    const content = flipContainer.querySelector('.content');
+    
+    content.style.position = 'relative';
+    content.style.top = '0';
+    content.style.right = '-48%';
+    content.style.transform = 'rotateZ(90deg) translateX(75%) translateY(100%) scale(1.5)';
+    subtitle.style.transform = 'rotateZ(90deg) translateX(73.5%) translateY(-240%) scale(1.5)';
+    subtitle.style.top = '0';
+    subtitle.style.right = '-37%';
+
+    const loadingText = document.querySelector('.loading-label');
+}
+// ~~ END MOBILE SCREEN OPTIMISATIONS ~~
+
 // ~~ ANIMATION LOOP ~~
 function animate() {
     requestAnimationFrame(animate);
