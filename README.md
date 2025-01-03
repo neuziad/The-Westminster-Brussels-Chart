@@ -42,7 +42,7 @@ This will install all of the necessary dependencies and build the web applicatio
 
 There's a slight chance I won't ever get around to these but, either way, here are potential new features I would like to add to this app in the future:
 
-- [ ] Mobile compatibility
+- [X] Mobile compatibility
 - [ ] More comprehensive data: have each seat display individual MEPs
 - [ ] Filtering seats by country
 - [ ] Individual pages for each parliamentary group: explaining the ideologies and philosophies each parliamentary groups have in common and their general voting record.

@@ -117,7 +117,7 @@ const groups = [
 
 const specialGroups = [
     { name: "European Commission", color: 0xf67003, cubes: [], picture: "/portraits/EC.jpg", notablePerson: "Ursula von der Leyen, DE" },
-    { name: "Council of the EU", color: 0x2284a1, cubes: [], picture: "/portraits/COUNCIL.jpg", notablePerson: "Hungary, HU" },
+    { name: "Council of the EU", color: 0x2284a1, cubes: [], picture: "/portraits/COUNCIL.jpg", notablePerson: "Poland, PL" },
 ];
 
 // ~~ LOADING MANAGER ~~
